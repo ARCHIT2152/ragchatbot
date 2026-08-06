@@ -1,0 +1,77 @@
+--- Page 1 ---
+                                                                                  
+  A R C H  I T B A  N K E Y                                                       
+                                                                                  
+  M A L E , 21 / 0 4 / 2006                                                       
+   T E C H N I C A L C O M P E T E N C I E S                                      
+                 Languages: Python, SQL                                           
+   Programming                                                                    
+                 Frameworks & Libraries: Scikit-learn, XGBoost, PyTorch, Ultralytics YOLOv8
+   Machine Learning                                                               
+                 Tools: Pandas, NumPy, OpenCV, Roboflow, SHAP, Matplotlib, Seaborn
+   Data & Vision                                                                  
+                 Environment: Jupyter Notebook, Google Colab, GitHub, Git, VS Code
+   Dev & Tools                                                                    
+                 Skills: Prompt Engineering, LLM integration concepts, IBM Generative AI stack
+   Generative AI                                                                  
+   P R O J E C T S                                                                
+   Social Media Addiction & Mental Health Classifier        ML Pipeline | Classification
+                 Built an end-to-end 3-class mental health classification system (Low / Moderate / High risk) to
+   Overview                                                                       
+                 stratify student risk tiers from social media behavioural and demographic survey data.
+                 · Model Development: Designed and trained Logistic Regression, Random Forest, and XGBoost
+   Workflow &                                                                     
+                  classifiers on a real student survey dataset, achieving 90% test accuracy and 88% cross-
+   Optimization                                                                   
+                  validated accuracy.                                             
+                 · Feature Engineering: Engineered target variable from raw mental health scores; enforced
+                  feature-leakage prevention by identifying and removing 5 correlated downstream columns to
+                  ensure model integrity.                                         
+                 · Evaluation Rigour: Applied 5-fold Stratified Cross-Validation with Macro F1 scoring to
+                  handle class imbalance; XGBoost selected as production model with low CV std of ±0.01,
+                  confirming generalisation stability.                            
+                 Proved that social media usage patterns are 4–5x more influential than personal demographics in
+   Outcome                                                                        
+                 determining student mental health outcomes.                      
+   Hourly Energy Consumption Forecasting              ML Pipeline | Time Series Regression
+                 Built an end-to-end ML pipeline on the PJM Interconnection dataset to predict 24-hour-ahead
+   Overview                                                                       
+                 energy demand — the core problem utilities face in deciding how much power to generate.
+                 · Data Cleaning & EDA Removed anomalous readings and uncovered cyclical patterns (hour, day,
+   Workflow &                                                                     
+                  month) and a long-term declining trend — directly driving feature selection.
+   Optimization                                                                   
+                 · Feature Engineering: Built cyclical encodings (hour_sin/hour_cos), an hour × month interaction
+                  term, and replaced raw lag with lag_24h_delta to prevent the model from simply copying
+                  yesterday's values..                                            
+                 · Metric Integrity: Achieved >90% forecasting accuracy (R² score) with low RMSE and MAE
+                  through feature engineering, cross-validation, and regression-based energy demand prediction.
+                 Delivered a demand prediction pipeline that enables informed generation planning before the day
+   Outcome                                                                        
+                 begins — reducing the risk of blackouts and costly overproduction.
+   Real-Time Weapon Detection System                   Computer Vision | Object Detection
+                 Fine-tuned YOLOv8m on a custom multi-class weapon dataset to build a production-grade real-
+   Overview                                                                       
+                 time detection system for security surveillance applications.    
+                 · Model Fine-Tuning: Fine-tuned YOLOv8m on a custom Roboflow dataset (knife, gun, pistol
+   Workflow &                                                                     
+                  classes) for 150 epochs ; trained on GPU at 640×640 resolution, batch size 16.
+   Optimization                                                                   
+                 · Inference Pipeline: Engineered real-time inference pipeline supporting static images, recorded
+                  video, and live webcam feed via OpenCV — with dynamic confidence threshold slider and
+                  automated alert-frame archiving on detection.                   
+                 · Evaluation: Benchmarked model performance using mAP50, mAP50-95, Precision, and Recall
+                  via a dedicated validation script, adhering to standard object detection evaluation protocols.
+                 Transforms reactive CCTV cameras into proactive security systems capable of instantly alerting
+   Outcome                                                                        
+                 authorities the split-second a weapon is drawn, potentially stopping a tragedy before it happens.
+   A C A D E M I C P R O F I L E                                                  
+   Degree / Board Institution                                  Score     Year     
+   B.Tech. (AI/ML) MIT Art, Design & Technology, Pune         8.6 CGPA 2024 – 28  
+   Class XII (CBSE) Sardar Patel Public School , Bhopal         74%      2024     
+   C E R T I F I C A T I O N S & C R E D E N T I A L S                            
+   Issuing Body  Certification                                           Date     
+   IBM / Coursera Generative AI: Elevate Your Data Science Career | Verify: Mar 2026
+                 coursera.org/verify/XOSNYVBEA2OH                                 
+   IBM / Coursera Machine Learning with Python | Verify: coursera.org/verifyDQLOZIFK17DG Jan 2026
+           Phone: +917898349117  github     bankeyarchit52@gmail.com linkedin     
