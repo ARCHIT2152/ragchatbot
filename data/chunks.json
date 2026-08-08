@@ -1,0 +1,398 @@
+[
+  {
+    "source": "resume",
+    "text": "##HEADER##A R C H  I T B A  N K E Y\n                                                                                  \n##HEADER##M A L E , 21 / 0 4 / 2006"
+  },
+  {
+    "source": "resume",
+    "text": "##HEADER##T E C H N I C A L C O M P E T E N C I E S\n                 Languages: Python, SQL                                           \n   Programming                                                                    \n                 Frameworks & Libraries: Scikit-learn, XGBoost, PyTorch, Ultralytics YOLOv8\n   Machine Learning                                                               \n                 Tools: Pandas, NumPy, OpenCV, Roboflow, SHAP, Matplotlib, Seaborn\n   Data & Vision                                                                  \n                 Environment: Jupyter Notebook, Google Colab, GitHub, Git, VS Code"
+  },
+  {
+    "source": "resume",
+    "text": "Dev & Tools                                                                    \n                 Skills: Prompt Engineering, LLM integration concepts, IBM Generative AI stack\n   Generative AI"
+  },
+  {
+    "source": "resume",
+    "text": "##HEADER##A C A D E M I C P R O F I L E\n   Degree / Board Institution                                  Score     Year     \n   B.Tech. (AI/ML) MIT Art, Design & Technology, Pune         8.6 CGPA 2024 \u2013 28  \n   Class XII (CBSE) Sardar Patel Public School , Bhopal         74%      2024"
+  },
+  {
+    "source": "resume",
+    "text": "##HEADER##C E R T I F I C A T I O N S & C R E D E N T I A L S\n   Issuing Body  Certification                                           Date     \n   IBM / Coursera Generative AI: Elevate Your Data Science Career | Verify: Mar 2026\n                 coursera.org/verify/XOSNYVBEA2OH                                 \n   IBM / Coursera Machine Learning with Python | Verify: coursera.org/verifyDQLOZIFK17DG Jan 2026\n           Phone: +917898349117  github     bankeyarchit52@gmail.com linkedin"
+  },
+  {
+    "source": "energy_readme.md",
+    "text": "# \u26a1 Hourly Energy Consumption Forecasting\n### PJM Interconnection \u2014 15 Years of Demand Data | XGBoost \u00b7 Random Forest \u00b7 Linear Regression\n\n---\n\n## Overview\n\nEnd-to-end machine learning project forecasting hourly electricity demand (in megawatts) across the PJM Interconnection grid \u2014 a regional operator covering Pennsylvania, New Jersey, Maryland, Ohio, and surrounding states.\n\nThe goal is to predict consumption **24 hours ahead** \u2014 the realistic horizon utilities use when scheduling generation. Short-horizon lags (1h, 2h) that essentially copy the current value are deliberately excluded.\n\n---"
+  },
+  {
+    "source": "energy_readme.md",
+    "text": "## Dataset\n\n| Property | Value |\n|---|---|\n| Source | [Kaggle \u2014 PJM Hourly Energy Consumption](https://www.kaggle.com/datasets/robikscube/hourly-energy-consumption) |\n| File | `PJME_hourly.csv` |\n| Columns | `Datetime`, `PJME_MW` |\n| Range | ~2002 \u2013 2018 |\n| Size | ~130,000 rows |\n\n---\n\n## Project Structure\n\n```\nenergy-forecasting/\n\u251c\u2500\u2500 energy_forecasting.ipynb   # Main notebook (all steps end-to-end)\n\u251c\u2500\u2500 PJME_hourly.csv            # Raw dataset (download from Kaggle)\n\u2514\u2500\u2500 README.md\n```\n\n---"
+  },
+  {
+    "source": "energy_readme.md",
+    "text": "## Methodology\n\n### 1 \u00b7 Data Cleaning\n- Parsed and sorted the datetime index\n- Removed anomalous low values (< 19,000 MW) \u2014 likely sensor errors or grid anomalies\n- Verified no duplicate timestamps or missing values\n\n### 2 \u00b7 Exploratory Data Analysis\nKey patterns discovered:\n- **Hour of day** \u2014 consumption troughs at 4\u20135 AM, peaks at 5\u20137 PM\n- **Day of week** \u2014 weekdays run ~8% higher than weekends\n- **Month** \u2014 classic dual-peak: winter heating (Jan/Feb) and summer cooling (Jul/Aug)\n- **Year** \u2014 slow downward trend since ~2008, likely from efficiency improvements\n\n### 3 \u00b7 Feature Engineering"
+  },
+  {
+    "source": "energy_readme.md",
+    "text": "| Feature | Description |\n|---|---|\n| `hour`, `dayofweek`, `month`, `year`, `quarter`, `dayofyear` | Calendar features |\n| `is_weekend` | Binary weekend flag |\n| `hour_sin`, `hour_cos` | Cyclical hour encoding (hour 23 \u2194 hour 0 are adjacent) |\n| `hour_x_month` | Interaction term \u2014 season-of-day proxy |\n| `lag_24h_delta` | Change in consumption from 48h \u2192 24h ago (trend signal) |\n| `lag_48h`, `lag_72h`, `lag_168h` | Lagged consumption at 2 days, 3 days, 1 week ago |\n| `rolling_mean_24h` | 24h rolling average, shifted 24h (no leakage) |\n| `rolling_mean_7d` | 7-day rolling average, shifted 24h (weekly baseline) |"
+  },
+  {
+    "source": "energy_readme.md",
+    "text": "> **Why `lag_24h_delta` instead of raw `lag_24h`?**\n> The raw same-hour-yesterday value is so predictive that XGBoost assigned it ~0.80 importance, ignoring almost everything else. Replacing it with a *delta* forces the model to use the full feature set to set the level, producing a genuinely balanced and more robust model.\n\n### 4 \u00b7 Train / Test Split\n\nTemporal split \u2014 no shuffling, no leakage:\n- **Training:** 2002 \u2192 end of 2016\n- **Test:** 2017 \u2192 2018\n\n### 5 \u00b7 Models\n\nThree models trained and compared, all using the same feature set:"
+  },
+  {
+    "source": "energy_readme.md",
+    "text": "| Model | Notes |\n|---|---|\n| Linear Regression | Baseline \u2014 no hyperparameters |\n| Random Forest | 300 trees, `max_depth=None`, `max_features=0.7` |\n| **XGBoost** *(best)* | 500 trees, `colsample_bytree=0.7`, `subsample=0.8` |\n\n---"
+  },
+  {
+    "source": "energy_readme.md",
+    "text": "## Results\n\n<img width=\"622\" height=\"251\" alt=\"image\" src=\"https://github.com/user-attachments/assets/404dc518-5c26-4a79-9dc9-5079bf91c0ae\" />\n\n\n> *Run the notebook to populate exact numbers \u2014 they depend on your environment.*\n\nXGBoost wins due to its sequential boosting (each tree corrects prior errors) and the `colsample_bytree` regularisation preventing over-reliance on any single feature.\n\n---"
+  },
+  {
+    "source": "energy_readme.md",
+    "text": "## Key Learnings\n\n**What worked well**\n- Replacing `lag_24h` with `lag_24h_delta` \u2014 the single biggest fix for a balanced importance chart\n- Cyclical hour encoding (`sin`/`cos`) \u2014 better than raw integers for the model\n- `colsample_bytree=0.7` on XGBoost \u2014 distributes learning across the full feature set\n- Temporal train/test split \u2014 essential for honest evaluation on time series"
+  },
+  {
+    "source": "energy_readme.md",
+    "text": "**What to watch out for**\n- Sub-24h lags inflate R\u00b2 to ~0.99 but are cheating \u2014 the model just copies the current value\n- Random Forest with `max_depth=10` underperforms Linear Regression; use `max_depth=None` with `min_samples_leaf` for regularisation instead\n- The model struggles at extreme peaks (heatwaves, cold snaps) \u2014 rare events are underrepresented in training\n\n**What could improve this further**\n- Weather data (temperature is the single biggest missing signal)\n- Holiday flags (Christmas, July 4th look very different from regular days)\n- Walk-forward (rolling window) cross-validation\n- Time-series native models: Prophet, SARIMA, LSTM, or Temporal Fusion Transformer\n\n---"
+  },
+  {
+    "source": "energy_readme.md",
+    "text": "## Setup\n\n```bash\npip install pandas numpy matplotlib seaborn scikit-learn xgboost\n```\n\nDownload `PJME_hourly.csv` from [Kaggle](https://www.kaggle.com/datasets/robikscube/hourly-energy-consumption) and update the path in the first data-loading cell, then run all cells top to bottom.\n\n---\n\n## Acknowledgements\n\nDataset by [Rob Mulla](https://www.kaggle.com/robikscube) on Kaggle."
+  },
+  {
+    "source": "mentalhealth_readme.md",
+    "text": "# \ud83e\udde0 Student Mental Health Level Classifier\n### Predicting Mental Health Tiers from Social Media & Demographic Features\n\n---"
+  },
+  {
+    "source": "mentalhealth_readme.md",
+    "text": "## \ud83d\udccc What This Project Does\n\nSocial media use has become central to student life \u2014 but its relationship to mental health is poorly understood in a predictive sense. This project answers the question:\n\n> **Can we reliably predict a student's mental health tier (Low / Moderate / High) from their social media habits and basic demographics alone \u2014 without asking them directly about their mental state?**"
+  },
+  {
+    "source": "mentalhealth_readme.md",
+    "text": "We build a full supervised ML pipeline that:\n- Cleans and encodes a real student survey dataset\n- Engineers a 3-class mental health target from raw scores\n- Trains and compares three progressively powerful classifiers\n- Evaluates them honestly with stratified cross-validation\n- Identifies which features matter most and visualises all results\n\nThe best model achieves **90% test accuracy and 88% CV accuracy**, meaning this signal is genuinely learnable from behavioural data.\n\n---"
+  },
+  {
+    "source": "mentalhealth_readme.md",
+    "text": "## \ud83d\uddc2\ufe0f Project Walkthrough \u2014 Step by Step\n\n### Step 1 \u2014 Data Loading & Inspection\nThe dataset `students_socialmedia.csv` contains student-level survey responses covering social media usage, sleep, academics, and demographics. On load, the shape is printed to confirm it was read correctly.\n\n### Step 2 \u2014 Missing Value Imputation\nMissing entries are filled with the **column mode** (most frequent value). This is robust for categorical-heavy survey data where mean/median imputation would be semantically wrong (e.g., filling \"Platform\" with a mean makes no sense)."
+  },
+  {
+    "source": "mentalhealth_readme.md",
+    "text": "### Step 3 \u2014 Categorical Encoding\nAll object-type columns are passed through `LabelEncoder`, converting string labels (e.g., `\"Instagram\"`, `\"Male\"`) to integers. This makes the data compatible with all three sklearn-based models without expanding dimensionality (unlike one-hot encoding).\n\n### Step 4 \u2014 Target Engineering\nThe raw `Mental_Health_Score` column (integer, 4\u20139) is binned into three ordinal classes:\n\n| Class | Score Range | Meaning |\n|---|---|---|\n| 0 | 4\u20135 | Low mental health |\n| 1 | 6\u20137 | Moderate mental health |\n| 2 | 8\u20139 | High mental health |"
+  },
+  {
+    "source": "mentalhealth_readme.md",
+    "text": "This transforms the problem from a regression (predict a number) into a **meaningful classification** (predict a wellness tier), which is more actionable and interpretable.\n\n### Step 5 \u2014 Feature Leakage Prevention\nSeveral columns are explicitly dropped before any model sees the data:"
+  },
+  {
+    "source": "mentalhealth_readme.md",
+    "text": "| Dropped Column | Reason |\n|---|---|\n| `Mental_Health_Score` | Raw source of the target \u2014 direct leak |\n| `MH_Level` | The target itself |\n| `Student_ID` | Non-informative identifier |\n| `Addicted_Score` | Consequence of the same behaviour, not a cause |\n| `Affects_Academic_Performance` | Outcome of poor mental health, not predictor |\n| `Conflicts_Over_Social_Media` | Downstream effect, would inflate accuracy artificially |\n\nSkipping this step would cause the model to cheat, learning target-correlated noise instead of real behaviour patterns."
+  },
+  {
+    "source": "mentalhealth_readme.md",
+    "text": "### Step 6 \u2014 Stratified Train / Test Split\nData is split 80/20 with `stratify=y`, ensuring all three mental health classes appear in both sets at the same proportion as the full dataset. Without stratification, rare classes (especially \"High\") could be underrepresented in the test set, giving misleadingly good results.\n\n### Step 7 \u2014 Model Training\nThree models are trained, each representing a different level of complexity:\n\n**Logistic Regression** \u2014 linear baseline\n- Wrapped in a `StandardScaler` pipeline (mandatory for regularised linear models)\n- Low regularisation (`C=0.05`) to avoid overfitting on a small dataset\n- Cannot capture non-linear interactions between features"
+  },
+  {
+    "source": "mentalhealth_readme.md",
+    "text": "**Random Forest** \u2014 non-linear ensemble\n- 80 decision trees, each trained on a random feature subset\n- `max_depth=5` and `min_samples_leaf=5` prevent individual trees from memorising training data\n- Captures feature interactions that Logistic Regression misses\n- Also provides feature importances as a bonus\n\n**XGBoost (Gradient Boosting)** \u2014 sequential boosting ensemble\n- Builds trees one at a time, each correcting the errors of the previous\n- Conservative settings: `lr=0.05`, `max_depth=3`, `subsample=0.7` \u2014 reduces overfitting\n- Best suited for structured tabular data; consistently outperforms random forests on small-to-medium datasets"
+  },
+  {
+    "source": "mentalhealth_readme.md",
+    "text": "### Step 8 \u2014 Evaluation\nEach model is evaluated on three metrics:\n- **Test Accuracy** \u2014 raw proportion correct on held-out test set\n- **Macro F1** \u2014 average F1 across all three classes, treating them equally regardless of size (fairer than accuracy for imbalanced classes)\n- **5-fold Stratified CV Accuracy** \u2014 most trustworthy metric; the model is trained and tested 5 times on different splits, and the mean \u00b1 std is reported\n\nCV accuracy is used as the primary selection criterion because it reflects how the model generalises across the entire dataset, not just one lucky split."
+  },
+  {
+    "source": "mentalhealth_readme.md",
+    "text": "### Step 9 \u2014 Visualisation\nThree plots are generated and saved as `social_media_results.png`:\n1. **CV vs Test Accuracy bar chart** \u2014 side-by-side comparison with error bars showing CV std\n2. **Confusion Matrix** \u2014 for the best model (XGBoost), showing exactly where predictions succeed or fail\n3. **Feature Importance chart** \u2014 Random Forest importances showing which input variables carry the most predictive signal\n\n---"
+  },
+  {
+    "source": "mentalhealth_readme.md",
+    "text": "## \ud83d\udcca Results\n\n### Model Performance\n\n| Model | CV Accuracy | CV Std | Test Accuracy | Macro F1 |\n|---|---|---|---|---|\n| Logistic Regression | 0.74 | \u00b1~0.02 | 0.74 | Low |\n| Random Forest | 0.83 | \u00b1~0.02 | 0.84 | Moderate |\n| **XGBoost (GBT)** | **0.88** | **\u00b1~0.01** | **0.90** | **Best** |\n\n> 5-fold Stratified Cross-Validation \u00b7 XGBoost selected as best model by CV Accuracy\n\n### XGBoost Confusion Matrix (Test Set)\n\n| | Predicted Low | Predicted Moderate | Predicted High |\n|---|---|---|---|\n| **Actual Low** | 32 | 8 | 1 |\n| **Actual Moderate** | 1 | 77 | 1 |\n| **Actual High** | 0 | 3 | 18 |"
+  },
+  {
+    "source": "mentalhealth_readme.md",
+    "text": "- **Moderate** class: near-perfect (77/79, 97.5% recall) \u2014 largest class, most training signal\n- **High** class: 18/21 correct (85.7% recall) \u2014 3 edge cases confused with Moderate\n- **Low** class: 32/41 correct (78% recall) \u2014 8 cases drift into Moderate, likely genuine score-boundary ambiguity\n\n### Feature Importances (Random Forest)"
+  },
+  {
+    "source": "mentalhealth_readme.md",
+    "text": "| Rank | Feature | Approx. Importance | Insight |\n|---|---|---|---|\n| 1 | `Avg_Daily_Usage_Hours` | ~0.42 | By far the strongest signal \u2014 heavy usage strongly correlates with poor mental health |\n| 2 | `Sleep_Hours_Per_Night` | ~0.20 | Sleep disruption is a well-known mediator between screen time and wellbeing |\n| 3 | `Country` | ~0.16 | Cultural and systemic differences in mental health norms vary by geography |\n| 4 | `Most_Used_Platform` | ~0.10 | Platform type matters \u2014 passive scrolling differs from active social use |\n| 5 | `Age` | ~0.08 | Younger students may be more vulnerable to usage-related effects |"
+  },
+  {
+    "source": "mentalhealth_readme.md",
+    "text": "| 6 | `Academic_Level` | ~0.03 | University vs school-level stress differs slightly |\n| 7 | `Relationship_Status` | ~0.02 | Minor but present social context signal |\n| 8 | `Gender` | ~0.02 | Marginal demographic effect after controlling for usage |"
+  },
+  {
+    "source": "mentalhealth_readme.md",
+    "text": "### Output Plot\n\n<img width=\"1880\" height=\"707\" alt=\"Screenshot 2026-05-09 113359\" src=\"https://github.com/user-attachments/assets/a0a111ad-6d9e-48bd-8690-6b3fda708130\" />\n\n\n---"
+  },
+  {
+    "source": "mentalhealth_readme.md",
+    "text": "## \ud83d\udd0d Why Such High Accuracy? \u2014 An Honest Analysis\n\n90% accuracy on a 3-class problem is strong. Here is why it was achievable and what to keep in mind:\n\n### \u2705 Why It Works\n\n**One dominant feature does the heavy lifting.**\n`Avg_Daily_Usage_Hours` alone accounts for ~42% of the Random Forest's predictive power. It is a clean, continuous, low-noise variable that directly encodes behavioural intensity. When one feature is this discriminative, a well-regularised model can anchor most predictions on it reliably."
+  },
+  {
+    "source": "mentalhealth_readme.md",
+    "text": "**Sleep compounds the signal.**\n`Sleep_Hours_Per_Night` adds another ~20% importance. Sleep and screen time together are strongly correlated with the target because mental health \u2014 as a lived experience \u2014 manifests most visibly through these two behavioural channels. The model is essentially learning: *high usage + low sleep = poor mental health*, which matches established psychology literature."
+  },
+  {
+    "source": "mentalhealth_readme.md",
+    "text": "**XGBoost is the right tool for this data shape.**\nSequential gradient boosting excels at tabular data with a mix of a few dominant features and several weaker ones. Its shallow trees (`max_depth=3`) avoid memorising the training set, while each round corrects prior errors \u2014 making it particularly effective at resolving the boundary cases (Low vs Moderate) that confuse single-tree models.\n\n**The Moderate class is large and clean.**\nThe majority of students fall in the Moderate tier. Predicting this class well alone accounts for a large fraction of the overall accuracy. XGBoost achieves 97.5% recall on Moderate, which lifts the headline number."
+  },
+  {
+    "source": "mentalhealth_readme.md",
+    "text": "**Stratification and CV prevent inflated estimates.**\nEvery metric is computed on data the model never trained on. The close match between CV accuracy (0.88) and test accuracy (0.90) confirms the model is genuinely generalising, not overfitting to a lucky split.\n\n### \u26a0\ufe0f Caveats"
+  },
+  {
+    "source": "mentalhealth_readme.md",
+    "text": "| Caveat | Detail |\n|---|---|\n| Low class is hardest | 78% recall \u2014 the Low/Moderate boundary is fuzzy in self-reported data, and the model reflects that human ambiguity |\n| Single survey source | Performance may not generalise to different student populations, countries, or time periods |\n| Correlation \u2260 causation | The model learns co-occurrence patterns \u2014 it cannot confirm that reducing screen time *causes* better mental health |\n| Class imbalance | Moderate dominates; Macro F1 is a better single-number summary than accuracy for this reason |\n\n---"
+  },
+  {
+    "source": "mentalhealth_readme.md",
+    "text": "## \ud83d\udee0\ufe0f Requirements\n\n```\npandas\nnumpy\nmatplotlib\nseaborn\nscikit-learn\n```\n\nInstall all dependencies:\n\n```bash\npip install pandas numpy matplotlib seaborn scikit-learn\n```\n\n> No external XGBoost package needed \u2014 `GradientBoostingClassifier` from scikit-learn is used as the boosting model.\n\n---"
+  },
+  {
+    "source": "mentalhealth_readme.md",
+    "text": "## \ud83d\ude80 Usage\n\n1. **Clone the repository**\n\n```bash\ngit clone https://github.com/your-username/student-mental-health-classifier.git\ncd student-mental-health-classifier\n```\n\n2. **Place your dataset** in the project root as `students_socialmedia.csv`\n\n3. **Run the script**\n\n```bash\npython social_media_fixed.py\n```\n\n4. **Outputs**\n   - Console: class distribution, per-model metrics, CV scores, best-model classification report\n   - File: `social_media_results.png` \u2014 three-panel comparison figure\n\n---"
+  },
+  {
+    "source": "mentalhealth_readme.md",
+    "text": "## \ud83d\udcc1 Project Structure\n\n```\n\u251c\u2500\u2500 social_media_fixed.py        # Main training & evaluation script\n\u251c\u2500\u2500 students_socialmedia.csv     # Dataset (not included \u2014 add your own)\n\u251c\u2500\u2500 social_media_results.png     # Output plot (generated on run)\n\u2514\u2500\u2500 README.md\n```\n\n---"
+  },
+  {
+    "source": "mentalhealth_readme.md",
+    "text": "## \ud83d\udd2c Full Methodology Reference"
+  },
+  {
+    "source": "mentalhealth_readme.md",
+    "text": "| Step | Choice | Justification |\n|---|---|---|\n| Missing value imputation | Column mode | Robust for categorical survey data |\n| Encoding | `LabelEncoder` | Compact; no dimensionality explosion vs one-hot |\n| Train/test split | 80/20, stratified | Preserves class ratios in both sets |\n| Cross-validation | 5-fold Stratified KFold | Reliable generalisation estimate |\n| LR regularisation | `C=0.05` | Strong penalty prevents overfitting on small data |\n| RF depth limit | `max_depth=5`, `min_samples_leaf=5` | Balances expressiveness and generalisation |\n| GBT learning rate | `lr=0.05`, `subsample=0.7` | Slow learning + row sampling reduces overfitting |"
+  },
+  {
+    "source": "mentalhealth_readme.md",
+    "text": "| Model selection criterion | CV Accuracy | Less sensitive to test-set luck than a single split |"
+  },
+  {
+    "source": "mentalhealth_readme.md",
+    "text": "---"
+  },
+  {
+    "source": "mentalhealth_readme.md",
+    "text": "## \ud83d\udcc4 License\n\nMIT \u2014 free to use, modify, and distribute with attribution."
+  },
+  {
+    "source": "weapondetectiono_readme.md",
+    "text": "# \ud83d\udee1\ufe0f AI-Powered Real-Time CCTV Weapon Detection System\n\n> **YOLOv8m \u00b7 PyTorch \u00b7 OpenCV \u00b7 CUDA 12.1 \u00b7 RTX 4050**  \n> Real-time detection of knives, pistols, and other threat objects from live webcam or CCTV video feeds.\n\n---"
+  },
+  {
+    "source": "weapondetectiono_readme.md",
+    "text": "## Table of Contents"
+  },
+  {
+    "source": "weapondetectiono_readme.md",
+    "text": "1. [Project Overview](#1-project-overview)\n2. [How It Works \u2014 Algorithm Stack](#2-how-it-works--algorithm-stack)\n3. [Technology Stack](#3-technology-stack)\n4. [Directory Structure](#4-directory-structure)\n5. [Installation & Setup](#5-installation--setup)\n6. [Dataset Preparation](#6-dataset-preparation)\n7. [Training the Model](#7-training-the-model)\n8. [Running Real-Time Detection](#8-running-real-time-detection)\n9. [Model Performance & Metrics](#9-model-performance--metrics)\n10. [Performance Curves Analysis](#10-performance-curves-analysis)\n11. [Confusion Matrix Analysis](#11-confusion-matrix-analysis)\n12. [Dataset Statistics](#12-dataset-statistics)"
+  },
+  {
+    "source": "weapondetectiono_readme.md",
+    "text": "13. [Training History](#13-training-history)\n14. [Future Scope](#14-future-scope)"
+  },
+  {
+    "source": "weapondetectiono_readme.md",
+    "text": "---"
+  },
+  {
+    "source": "weapondetectiono_readme.md",
+    "text": "## 1. Project Overview\n\nTraditional CCTV surveillance is purely passive \u2014 it records footage and depends entirely on human operators watching screens. This introduces critical vulnerabilities: operator fatigue, delayed reaction times, and the physical impossibility of monitoring hundreds of cameras simultaneously.\n\nThis project replaces passive monitoring with an **intelligent, automated, real-time Computer Vision system** that:"
+  },
+  {
+    "source": "weapondetectiono_readme.md",
+    "text": "- Analyses live CCTV or webcam feeds at **30+ FPS** using GPU acceleration\n- Detects lethal weapons (**knives, pistols, guns**) in fractions of a second\n- Draws **red bounding boxes** with class labels and confidence scores on detected threats\n- Triggers **timestamped console alerts** the moment a weapon exceeds the confidence threshold\n- Automatically **saves evidence JPEG frames** to disk for security review"
+  },
+  {
+    "source": "weapondetectiono_readme.md",
+    "text": "The system was trained iteratively across 7 model versions, culminating in a **YOLOv8m** (Medium, 25.9M parameters) model trained on an augmented Roboflow dataset, achieving a peak **mAP@50-95 of 0.6033** \u2014 meaning the AI draws surgically tight bounding boxes around weapon edges with verified accuracy.\n\n---"
+  },
+  {
+    "source": "weapondetectiono_readme.md",
+    "text": "## 2. How It Works \u2014 Algorithm Stack\n\n### 2.1 CNN \u2014 Convolutional Neural Network\nThe foundational algorithm for all visual understanding. Instead of processing an entire image at once, a CNN slides small 3\u00d73 mathematical filters (kernels) across every pixel. Early layers detect edges and gradients (the straight metallic edge of a knife blade). Deep layers detect complex shapes (the distinctive L-shape of a pistol grip). YOLOv8m contains 200+ such convolutional layers."
+  },
+  {
+    "source": "weapondetectiono_readme.md",
+    "text": "### 2.2 CSPDarknet Backbone\nThe feature-extraction engine inside YOLOv8. Normal networks recalculate the same information multiple times. CSP (Cross Stage Partial) architecture solves this by **splitting the data flow into two paths** at each stage: one path processes through dense math layers, the other bypasses them. Both paths merge at the end via a 1\u00d71 convolution. This eliminates redundant computation, enabling 200+ layer depth at 30+ FPS on the RTX 4050."
+  },
+  {
+    "source": "weapondetectiono_readme.md",
+    "text": "### 2.3 YOLO \u2014 You Only Look Once\nThe primary object detection algorithm. Unlike two-stage detectors (R-CNN) that first propose regions then classify them, YOLO passes the image through the neural network **exactly once**. It divides the image into a 20\u00d720 grid (= 8,400 cells), and each cell simultaneously predicts bounding box coordinates, objectness score, and class probabilities for all weapon types. This single-pass architecture is why real-time detection at 30+ FPS is achievable.\n\n```\nConfidence Score = P(Object) \u00d7 IoU(pred, truth) \u00d7 P(Class | Object)\n```"
+  },
+  {
+    "source": "weapondetectiono_readme.md",
+    "text": "### 2.4 Non-Maximum Suppression (NMS)\nAfter YOLO generates 8,400 candidate boxes per frame, many overlap on the same weapon. NMS eliminates duplicates by: sorting all boxes by confidence descending, keeping the highest-confidence box, then suppressing any remaining box with IoU > 0.5 overlap with it. This reduces 8,400 raw predictions to 1\u20133 clean final boxes, one per visible weapon."
+  },
+  {
+    "source": "weapondetectiono_readme.md",
+    "text": "### 2.5 Transfer Learning\nRather than training from random weights (which would take weeks), the model starts from `yolov8m.pt` \u2014 pretrained on the COCO dataset (80 classes, millions of images). The backbone already understands edges, textures, and shapes. Only the **detection head** is fine-tuned on the weapon dataset, enabling convergence in hours instead of weeks on the RTX 4050.\n\n### 2.6 Distribution Focal Loss (DFL) + Varifocal Loss (VFL)\nThe dual loss system that grades each training prediction:"
+  },
+  {
+    "source": "weapondetectiono_readme.md",
+    "text": "- **VFL** handles classification (knife vs. pistol vs. background). It mathematically suppresses the ~95% empty background cells so weapon cells dominate the gradient signal \u2014 directly solving the class imbalance problem.\n- **DFL** handles localization. Instead of predicting a single edge coordinate, it models each box edge as a probability distribution over possible positions, forcing the model to snap box edges as tightly as possible to weapon boundaries. This is what drives the mAP@50-95 score higher."
+  },
+  {
+    "source": "weapondetectiono_readme.md",
+    "text": "### 2.7 Backpropagation & AdamW Optimizer\nAfter each forward pass, the total loss is backpropagated through all 200+ layers using PyTorch's autograd engine. AdamW updates all 25.9 million weights using adaptive momentum \u2014 maintaining a running average of past gradients to smooth noisy updates. Over 150 epochs \u00d7 ~500 batches, this performs approximately **1.2 million weight update steps** to produce `best.pt`.\n\n---"
+  },
+  {
+    "source": "weapondetectiono_readme.md",
+    "text": "## 3. Technology Stack"
+  },
+  {
+    "source": "weapondetectiono_readme.md",
+    "text": "| Library | Version | Role in Project |\n|---------|---------|-----------------|\n| **Python** | 3.11 | Core scripting language for all pipeline scripts |\n| **PyTorch** | 2.x + CUDA 12.1 | Neural network engine: tensors, autograd, GPU dispatch |\n| **Ultralytics YOLOv8** | Latest | High-level detection framework on top of PyTorch |\n| **OpenCV (cv2)** | 4.x | Video I/O, frame capture, bounding box rendering, JPEG saving |\n| **NumPy** | Latest | Image frames as (H\u00d7W\u00d73) arrays; all pixel math |\n| **Pandas** | Latest | Parsing `results.csv` to programmatically find best model |\n| **CUDA** | 12.1 | NVIDIA parallel compute platform; 2560 cores on RTX 4050 |"
+  },
+  {
+    "source": "weapondetectiono_readme.md",
+    "text": "| **GPU Hardware** | NVIDIA GeForce RTX 4050 | Trains 50 epochs in ~2.5 hrs vs. ~50 hrs on CPU |"
+  },
+  {
+    "source": "weapondetectiono_readme.md",
+    "text": "---"
+  },
+  {
+    "source": "weapondetectiono_readme.md",
+    "text": "## 4. Directory Structure"
+  },
+  {
+    "source": "weapondetectiono_readme.md",
+    "text": "```\nweapon_detection/\n\u2502\n\u251c\u2500\u2500 train.py                        # Model training script\n\u251c\u2500\u2500 detect.py                       # Real-time inference & alert system\n\u251c\u2500\u2500 check_metrics.py                # Programmatic best-model finder (Pandas)\n\u251c\u2500\u2500 voc_to_yolo.py                  # Pascal VOC XML \u2192 YOLO TXT converter\n\u251c\u2500\u2500 val.py                          # Standalone validation script\n\u251c\u2500\u2500 requirements.txt                # All Python dependencies\n\u2502\n\u251c\u2500\u2500 weapon detection.v1i.yolov8/    # Roboflow augmented dataset (Phase 2)\n\u2502   \u251c\u2500\u2500 data.yaml                   # Class names, train/val paths\n\u2502   \u251c\u2500\u2500 images/\n\u2502   \u2502   \u251c\u2500\u2500 train/                  # Training images (.jpg)"
+  },
+  {
+    "source": "weapondetectiono_readme.md",
+    "text": "\u2502   \u2502   \u2514\u2500\u2500 val/                    # Validation images (.jpg)\n\u2502   \u2514\u2500\u2500 labels/\n\u2502       \u251c\u2500\u2500 train/                  # YOLO TXT label files for train\n\u2502       \u2514\u2500\u2500 val/                    # YOLO TXT label files for val\n\u2502\n\u251c\u2500\u2500 runs/\n\u2502   \u2514\u2500\u2500 detect/\n\u2502       \u2514\u2500\u2500 weapon_detection_model7/\n\u2502           \u251c\u2500\u2500 weights/\n\u2502           \u2502   \u251c\u2500\u2500 best.pt         # \u2190 Best model (Epoch 68, mAP50-95: 0.6033)\n\u2502           \u2502   \u2514\u2500\u2500 last.pt         # Most recent epoch weights\n\u2502           \u251c\u2500\u2500 results.csv         # Per-epoch metrics log\n\u2502           \u251c\u2500\u2500 BoxF1_curve.png     # F1-Confidence curve\n\u2502           \u251c\u2500\u2500 BoxP_curve.png      # Precision-Confidence curve\n\u2502           \u251c\u2500\u2500 BoxPR_curve.png     # Precision-Recall curve"
+  },
+  {
+    "source": "weapondetectiono_readme.md",
+    "text": "\u2502           \u251c\u2500\u2500 BoxR_curve.png      # Recall-Confidence curve\n\u2502           \u251c\u2500\u2500 confusion_matrix_normalized.png\n\u2502           \u2514\u2500\u2500 labels.jpg          # Dataset label distribution\n\u2502\n\u2514\u2500\u2500 detected_frames/                # Auto-created; saves weapon alert JPEGs\n```"
+  },
+  {
+    "source": "weapondetectiono_readme.md",
+    "text": "---"
+  },
+  {
+    "source": "weapondetectiono_readme.md",
+    "text": "## 5. Installation & Setup\n\n### Prerequisites\n- Python 3.11+\n- NVIDIA GPU with CUDA 12.1 (recommended) \u2014 CPU fallback supported\n- At least 6GB VRAM for training with `yolov8m`\n\n### Step 1 \u2014 Clone and install dependencies\n\n```bash\ngit clone https://github.com/your-username/weapon-detection.git\ncd weapon-detection\npip install -r requirements.txt\n```\n\n### Step 2 \u2014 Verify GPU availability (optional but recommended)\n\n```python\nimport torch\nprint(torch.cuda.is_available())          # Should print: True\nprint(torch.cuda.get_device_name(0))      # Should print: NVIDIA GeForce RTX 4050\n```\n\n### requirements.txt\n\n```\nultralytics\nopencv-python\ntorch\ntorchvision\npandas\nnumpy\n```\n\n---"
+  },
+  {
+    "source": "weapondetectiono_readme.md",
+    "text": "## 6. Dataset Preparation\n\n### Phase 1 \u2014 Kaggle Dataset (Pascal VOC format)\nThe initial dataset from Kaggle used Pascal VOC XML annotations with absolute pixel coordinates (`xmin, ymin, xmax, ymax`). YOLO requires normalized TXT files. The custom `voc_to_yolo.py` script performs the mathematical conversion:\n\n```python\nx_center = (xmin + xmax) / (2 \u00d7 image_width)\ny_center = (ymin + ymax) / (2 \u00d7 image_height)\nwidth    = (xmax - xmin) / image_width\nheight   = (ymax - ymin) / image_height\n```\n\n```bash\npython voc_to_yolo.py\n```\n\n**Result:** Created `labels/train/` and `labels/val/` directories with one `.txt` file per image."
+  },
+  {
+    "source": "weapondetectiono_readme.md",
+    "text": "### Phase 2 \u2014 Roboflow Augmented Dataset (weapon detection.v1i.yolov8)\nThe Phase 1 model suffered severe overfitting \u2014 it memorized clean Kaggle images and failed on real CCTV footage. The Roboflow dataset solved this with built-in augmentations:\n\n- **Blur & noise** \u2014 simulates low-quality CCTV cameras\n- **Brightness shifts** \u2014 handles night/day lighting conditions  \n- **Horizontal flips** \u2014 doubles training data for free\n- **Mosaic augmentation** \u2014 stitches 4 images into 1, training on multiple scales\n- **Class rename:** `gun` \u2192 `pistol` to match the new dataset taxonomy\n\n**Dataset class distribution (training split):**"
+  },
+  {
+    "source": "weapondetectiono_readme.md",
+    "text": "| Class | Instances | Notes |\n|-------|-----------|-------|\n| knife | 2,157 | Primary weapon class \u2014 largest representation |\n| billete | 561 | Banknote (context object) |\n| smartphone | 213 | Common false-positive trigger without this class |\n| pistol | 168 | Primary weapon class |\n| monedero | 63 | Coin purse |\n| tarjeta | 57 | Card |\n\n> **Note:** The inclusion of non-weapon classes (smartphone, billete, tarjeta) is intentional. Training the model to correctly classify common everyday objects reduces false-positive weapon alerts in real CCTV environments.\n\n---"
+  },
+  {
+    "source": "weapondetectiono_readme.md",
+    "text": "## 7. Training the Model\n\n```bash\npython train.py\n```\n\n### Training Configuration (`train.py`)\n\n```python\nmodel = YOLO(\"yolov8m.pt\")          # Medium model: 25.9M parameters"
+  },
+  {
+    "source": "weapondetectiono_readme.md",
+    "text": "model.train(\n    data=\"weapon detection.v1i.yolov8 (1)/data.yaml\",\n    epochs=150,                      # Maximum epochs allowed\n    imgsz=640,                       # Standard YOLO input resolution\n    batch=16,                        # 16 images per GPU weight update\n    name=\"weapon_detection_model\",\n    device=\"0\",                      # GPU (change to \"cpu\" if no NVIDIA GPU)\n    patience=25,                     # Early stopping: halts if no improvement for 25 epochs\n    save=True,\n    cache=True,\n    workers=4\n)\n```\n\n### Model Version History"
+  },
+  {
+    "source": "weapondetectiono_readme.md",
+    "text": "| Model | Architecture | Dataset | Device | Epochs | Outcome |\n|-------|-------------|---------|--------|--------|---------|\n| 1\u20132 | yolov8n (nano) | Kaggle VOC | CPU | 50 | Overfit to clean images |\n| 3\u20134 | yolov8n | Roboflow | CPU | 50 | Improved generalization |\n| 5\u20136 | yolov8m (medium) | Roboflow | GPU | 50 | Significant mAP jump |\n| **7** | **yolov8m** | **Roboflow** | **GPU (RTX 4050)** | **150 (ES @ ~93)** | **Peak: mAP50-95 = 0.6033** |\n\n**Output location:**\n```\nruns/detect/weapon_detection_model7/weights/best.pt   \u2190 use this for detect.py\nruns/detect/weapon_detection_model7/weights/last.pt\nruns/detect/weapon_detection_model7/results.csv\n```\n\n---"
+  },
+  {
+    "source": "weapondetectiono_readme.md",
+    "text": "## 8. Running Real-Time Detection\n\n```bash\n# Live webcam detection\npython detect.py --source 0\n\n# CCTV video file detection\npython detect.py --source /path/to/cctv_footage.mp4\n\n# Static image detection\npython detect.py --source /path/to/image.jpg\n\n# Custom output directory\npython detect.py --source 0 --save_dir /path/to/alerts/\n```\n\n### Detection System Features (`detect.py`)\n\n**Interactive confidence slider:** An OpenCV trackbar is displayed in the window. Dragging it adjusts the minimum confidence threshold in real-time without restarting the script. Set between 0.50\u20130.65 for optimal precision/recall balance based on the F1 curve analysis."
+  },
+  {
+    "source": "weapondetectiono_readme.md",
+    "text": "**Automated alert system:** The moment a `knife`, `pistol`, or `gun` exceeds the confidence threshold:\n- A timestamped alert is printed to console: `[2025-01-15 14:23:11] \u26a0\ufe0f ALERT: Weapon detected!`\n- A red bounding box with label (e.g., `PISTOL 0.87`) is drawn on the live frame\n- The annotated frame is saved as a JPEG to `detected_frames/` (throttled to every 30 frames to prevent disk flooding)"
+  },
+  {
+    "source": "weapondetectiono_readme.md",
+    "text": "**Inference pipeline per frame:**\n```\ncap.read() \u2192 NumPy (H,W,3) array\n\u2192 YOLO preprocessing (resize to 640\u00d7640, normalize \u00f7255)\n\u2192 GPU forward pass through 200+ CNN layers (~15ms on RTX 4050)\n\u2192 Confidence threshold filter\n\u2192 NMS deduplication\n\u2192 OpenCV bounding box render\n\u2192 cv2.imshow() \u2192 next frame\n```\n\n**Controls:**\n- `q` \u2014 quit the detection window\n- Confidence slider \u2014 adjust detection sensitivity in real-time\n- Close window button (X) \u2014 graceful shutdown\n\n---"
+  },
+  {
+    "source": "weapondetectiono_readme.md",
+    "text": "## 9. Model Performance & Metrics\n\n### Peak Performance (Model 7 \u2014 `best.pt`)\n\n| Metric | Value | Epoch |\n|--------|-------|-------|\n| **mAP@50-95** | **0.6033** | **68** \u2190 saved as best.pt |\n| mAP@50 | 0.7941 | 68 |\n| Precision | 0.9175 | 68 |\n| Recall | 0.7529 | 68 |\n| F1 Score (all classes) | **0.82** at conf=0.583 | \u2014 |\n\n### Early Stopping Status\n\nTraining ran for 84 epochs total before results.csv was recorded. The early stopping `patience=25` monitors for improvement beyond the 0.6033 peak achieved at Epoch 68. If no new high score is achieved by Epoch 93, PyTorch automatically terminates and definitively saves Epoch 68's weights as the final `best.pt`."
+  },
+  {
+    "source": "weapondetectiono_readme.md",
+    "text": "```\nPeak score:    mAP50-95 = 0.6033 (Epoch 68)\nEpochs since:  16 epochs without improvement (as of Epoch 84)\nPatience:      25 epochs\nTrigger epoch: Epoch 93 (if no improvement)\n```\n\n### Per-Class Performance (from Precision-Recall Curve)"
+  },
+  {
+    "source": "weapondetectiono_readme.md",
+    "text": "| Class | AP@50 | Notes |\n|-------|-------|-------|\n| knife | 0.935 | Highest \u2014 largest training set (2,157 instances) |\n| billete | 0.904 | Strong \u2014 good augmentation coverage |\n| smartphone | 0.889 | Strong \u2014 reduces false positives in real scenes |\n| pistol | 0.872 | Good \u2014 complex shape, smaller training set |\n| tarjeta | 0.663 | Moderate \u2014 visually similar to billete |\n| monedero | 0.499 | Weakest \u2014 only 63 training instances, severe class imbalance |\n| **All classes** | **0.794** | **Overall mAP@50** |\n\n### What mAP@50-95 = 0.6033 Means"
+  },
+  {
+    "source": "weapondetectiono_readme.md",
+    "text": "The mAP@50-95 metric averages precision across IoU thresholds from 0.50 to 0.95 in 0.05 steps. Unlike mAP@50 (which only requires 50% bounding box overlap), mAP@50-95 also rewards detections where the predicted box overlaps the ground truth by 90% or 95% \u2014 demanding surgically tight box edges. A score of **0.6033 on this strict scale confirms the model is not just finding weapons, but drawing precise, tight boxes around their exact edges.**\n\n---"
+  },
+  {
+    "source": "weapondetectiono_readme.md",
+    "text": "## 10. Performance Curves Analysis\n\n### F1-Confidence Curve\n\nThe F1 score (harmonic mean of Precision and Recall) peaks at **F1 = 0.82 at confidence threshold = 0.583** across all classes. This is the mathematically optimal threshold for the confidence slider in `detect.py` \u2014 it maximises the balance between catching all weapons (recall) and avoiding false alarms (precision)."
+  },
+  {
+    "source": "weapondetectiono_readme.md",
+    "text": "**Class-level observations:**\n- `knife` and `smartphone` achieve F1 > 0.90 across a wide confidence band (0.05\u20130.80)\n- `pistol` and `billete` maintain F1 ~0.85 through the mid-confidence range\n- `monedero` has poor F1 (peaks at 0.67) due to only 63 training instances \u2014 the primary candidate for dataset improvement\n- `tarjeta` degrades at high confidence (boxes too loose for the strict IoU requirement)\n\n**Practical implication:** Setting the slider in `detect.py` to **0.58** gives the statistically best balance for real-world CCTV deployment.\n\n### Precision-Confidence Curve"
+  },
+  {
+    "source": "weapondetectiono_readme.md",
+    "text": "Precision rises monotonically and converges to **1.00 at confidence = 0.945** for all classes combined. This means: at very high confidence settings, every single detection the model makes is correct (zero false positives). The trade-off is sharply reduced recall at this threshold.\n\n**For security applications:** If false alarms have high operational cost (e.g., locking down an airport checkpoint), setting confidence to **0.75\u20130.85** achieves ~90%+ precision while maintaining reasonable recall.\n\n### Precision-Recall Curve"
+  },
+  {
+    "source": "weapondetectiono_readme.md",
+    "text": "The PR curve area (mAP@50 = 0.794) shows that the model can maintain near-perfect precision (~1.0) up to ~50% recall, after which precision begins to trade off. The `knife` class (AP=0.935) achieves 90%+ precision all the way to 90%+ recall \u2014 the best-performing class.\n\n**The `monedero` cliff** at recall \u2248 0.50 reveals that after finding half of all purse instances, the model cannot find the rest without producing many false positives \u2014 a direct consequence of its 63-instance training set.\n\n### Recall-Confidence Curve"
+  },
+  {
+    "source": "weapondetectiono_readme.md",
+    "text": "Recall starts at **0.81 across all classes at confidence = 0** and remains stable through confidence 0.70 before dropping sharply. This plateau confirms the model is confidently detecting most weapons \u2014 the flat region means the confidence slider can be moved from 0 to 0.70 without losing meaningful recall.\n\nAt `detect.py`'s default threshold of **0.50**, expected recall is ~0.76 \u2014 meaning the system catches approximately 76 out of every 100 real weapon events in the scene.\n\n---"
+  },
+  {
+    "source": "weapondetectiono_readme.md",
+    "text": "## 11. Confusion Matrix Analysis\n\nThe normalized confusion matrix reveals the per-class accuracy of the model on the validation set:"
+  },
+  {
+    "source": "weapondetectiono_readme.md",
+    "text": "| Class | Correct Detection | Background Confusion | Key Finding |\n|-------|-------------------|----------------------|-------------|\n| pistol | **0.93** | 0.07 \u2192 background | Best weapon class \u2014 extremely high accuracy |\n| knife | **0.91** | 0.09 \u2192 background | Excellent \u2014 largest training set, highest AP |\n| smartphone | **0.86** | 0.14 \u2192 background | Good \u2014 important for reducing real-world false positives |\n| billete | **0.87** | 0.13 \u2192 background | Good \u2014 banknote detection working well |\n| tarjeta | **0.60** | 0.40 \u2192 background | Moderate \u2014 40% missed as background |\n| monedero | **0.50** | 0.50 \u2192 background | Weakest \u2014 half of all coin purses missed entirely |"
+  },
+  {
+    "source": "weapondetectiono_readme.md",
+    "text": "**Critical security insight \u2014 pistol and knife have 0 cross-class confusion.** The model never mistakes a knife for a pistol or vice versa. All errors are of the \"missed detection\" type (weapon classified as background) rather than the \"misclassification\" type (weapon classified as wrong weapon). For a security system, this is the preferred failure mode \u2014 a missed detection is less operationally dangerous than incorrectly identifying a phone as a pistol.\n\n**The `monedero` problem (0.50 accuracy)** is entirely a data quantity issue \u2014 63 training instances versus 2,157 for knife. Adding 200\u2013400 more diverse `monedero` images would likely push its accuracy to 0.80+.\n\n---"
+  },
+  {
+    "source": "weapondetectiono_readme.md",
+    "text": "## 12. Dataset Statistics (labels.jpg)\n\n**Training class distribution:**\n- Total training instances: **3,219**\n- Dominant class: `knife` (2,157 instances = 67% of dataset)\n- Smallest class: `tarjeta` (57 instances = 1.8% of dataset)"
+  },
+  {
+    "source": "weapondetectiono_readme.md",
+    "text": "**Bounding box geometry (from labels heatmap):**\n- Objects are **primarily centered** in images (x-y heatmap shows dense cluster around 0.4\u20130.6 normalized coordinates) \u2014 typical for controlled-capture security datasets\n- Bounding box **width-height cluster** tightly at 0.10\u20130.20 normalized size \u2014 meaning objects typically occupy 10\u201320% of the image width/height, matching real CCTV distances\n- The anchor box visualization shows boxes clustered around a consistent medium-small scale, which the YOLOv8m anchor-free detection head handles well\n\n---"
+  },
+  {
+    "source": "weapondetectiono_readme.md",
+    "text": "## 13. Training History\n\nBelow are the key metrics from `results.csv` showing model progression:\n\n| Epoch | mAP@50 | mAP@50-95 | Precision | Recall | Train Box Loss | Val Box Loss |\n|-------|--------|-----------|-----------|--------|----------------|--------------|\n| 1 | 0.245 | 0.126 | 0.702 | 0.296 | 1.611 | 1.875 |\n| 10 | ~0.45 | ~0.22 | ~0.75 | ~0.55 | ~1.35 | ~1.45 |\n| 25 | ~0.62 | ~0.38 | ~0.82 | ~0.68 | ~1.10 | ~1.20 |\n| 50 | ~0.74 | ~0.52 | ~0.88 | ~0.73 | ~0.85 | ~1.10 |\n| **68** | **0.794** | **0.603** | **0.917** | **0.753** | **~0.75** | **~0.95** |\n| 84 | 0.718 | 0.542 | 0.937 | 0.659 | 0.698 | 1.078 |"
+  },
+  {
+    "source": "weapondetectiono_readme.md",
+    "text": "**Training interpretation:**\n- Epoch 1\u201325: Rapid initial learning as the detection head adapts from COCO to weapon classes\n- Epoch 25\u201368: Steady improvement; augmented data prevents the overfitting seen in Phase 1\n- Epoch 68: Peak performance \u2014 highest mAP@50-95 of 0.6033 saved to `best.pt`\n- Epoch 69\u201384: Slight regression as the model begins to overspecialise; early stopping will trigger at Epoch 93 if no recovery\n\n---"
+  },
+  {
+    "source": "weapondetectiono_readme.md",
+    "text": "## 14. Future Scope\n\n### Immediate Improvements\n- **More `monedero` and `tarjeta` training data** \u2014 adding 300+ images for each would address the two weakest classes (AP 0.499 and 0.663) and push overall mAP above 0.65\n- **YOLOv8l (Large)** \u2014 43.7M parameters vs 25.9M; direct accuracy boost if VRAM allows\n- **100 epoch retraining** with targeted augmentation for underperforming classes"
+  },
+  {
+    "source": "weapondetectiono_readme.md",
+    "text": "### System Expansions\n- **Facial Recognition Integration** \u2014 correlate saved `detected_frames/` JPEGs with a face database (DeepFace / AWS Rekognition) to instantly identify suspects at point of detection\n- **Pose Estimation (YOLOv8-pose)** \u2014 analyse human skeleton keypoints alongside weapon detection to identify threatening stances (aiming posture) before the weapon is clearly visible\n- **Cloud & Edge Deployment** \u2014 migrate the PyTorch inference engine to AWS EC2 GPU instances for city-wide CCTV monitoring, or to NVIDIA Jetson edge devices for local processing at each camera node"
+  },
+  {
+    "source": "weapondetectiono_readme.md",
+    "text": "- **RTSP stream support** \u2014 connect directly to IP camera streams: `python detect.py --source rtsp://camera-ip/stream`\n- **Temporal smoothing** \u2014 require weapon detection in 3 of 5 consecutive frames before triggering an alert, eliminating single-frame false positives"
+  },
+  {
+    "source": "weapondetectiono_readme.md",
+    "text": "---\n---"
+  },
+  {
+    "source": "weapondetectiono_readme.md",
+    "text": "## Acknowledgements\n\n- **Ultralytics** for the YOLOv8 framework\n- **Roboflow** for the augmented weapon detection dataset (`weapon detection.v1i.yolov8`)\n- **NVIDIA** for CUDA acceleration infrastructure\n\n---\n<img width=\"794\" height=\"699\" alt=\"Screenshot 2026-04-27 172619\" src=\"https://github.com/user-attachments/assets/c0cfa983-3e4d-43b0-a6d2-7025b851a9b8\" />\n\n*Model trained on NVIDIA GeForce RTX 4050 \u00b7 CUDA 12.1 \u00b7 Python 3.11 \u00b7 Ultralytics YOLOv8m*"
+  }
+]
