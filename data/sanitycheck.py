@@ -15,31 +15,30 @@ def cosine_similarity(vec_a, vec_b):
     return dot_product / (magnitude_a * magnitude_b)
 
 # ---- Pick chunks to compare ----
-# Related: two chunks from the same project README (weapon detection)
+# Get all weapon detection chunks first, then filter for substantive/technical ones
 weapon_chunks = [c for c in chunks if c["source"] == "weapondetectiono_readme.md"]
-
-# Unrelated: one weapon detection chunk vs one from a different project/resume
 mentalhealth_chunks = [c for c in chunks if c["source"] == "mentalhealth_readme.md"]
-resume_chunks = [c for c in chunks if c["source"] == "resume"]
+
+# Related: two DIFFERENT technical chunks from weapon detection (not title/ToC)
+weapon_technical_1 = [c for c in weapon_chunks if "knife" in c["text"] or "pistol" in c["text"]]
+weapon_technical_2 = [c for c in weapon_chunks if "surveillance" in c["text"] or "alert" in c["text"] or "confidence threshold" in c["text"]]
+
+# Unrelated: substantive weapon detection chunk vs substantive mental health chunk
+mentalhealth_technical = [c for c in mentalhealth_chunks if "XGBoost" in c["text"] or "accuracy" in c["text"]]
 
 # ---- Run comparisons ----
 
-print("=== Related pair (both weapon detection) ===")
-sim_related = cosine_similarity(weapon_chunks[0]["embedding"], weapon_chunks[1]["embedding"])
-print(f"Chunk A: {weapon_chunks[0]['text'][:60]}...")
-print(f"Chunk B: {weapon_chunks[1]['text'][:60]}...")
+print("=== Related pair (both weapon detection, technical content) ===")
+sim_related = cosine_similarity(weapon_technical_1[0]["embedding"], weapon_technical_2[0]["embedding"])
+print(f"Chunk A: {weapon_technical_1[0]['text'][:60]}...")
+print(f"Chunk B: {weapon_technical_2[0]['text'][:60]}...")
 print(f"Cosine similarity: {sim_related:.4f}\n")
 
-print("=== Unrelated pair (weapon detection vs mental health) ===")
-sim_unrelated_1 = cosine_similarity(weapon_chunks[0]["embedding"], mentalhealth_chunks[0]["embedding"])
-print(f"Chunk A: {weapon_chunks[0]['text'][:60]}...")
-print(f"Chunk B: {mentalhealth_chunks[0]['text'][:60]}...")
+print("=== Unrelated pair (weapon detection vs mental health, technical content) ===")
+sim_unrelated_1 = cosine_similarity(weapon_technical_1[0]["embedding"], mentalhealth_technical[0]["embedding"])
+print(f"Chunk A: {weapon_technical_1[0]['text'][:60]}...")
+print(f"Chunk B: {mentalhealth_technical[0]['text'][:60]}...")
 print(f"Cosine similarity: {sim_unrelated_1:.4f}\n")
 
-print("=== Unrelated pair (weapon detection vs resume/certs) ===")
-sim_unrelated_2 = cosine_similarity(weapon_chunks[0]["embedding"], resume_chunks[0]["embedding"])
-print(f"Chunk A: {weapon_chunks[0]['text'][:60]}...")
-print(f"Chunk B: {resume_chunks[0]['text'][:60]}...")
-print(f"Cosine similarity: {sim_unrelated_2:.4f}\n")
 
 print("Sanity check: related similarity should be noticeably higher than unrelated.")
