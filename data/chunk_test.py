@@ -49,12 +49,14 @@ all_chunks = []
 
 resume_chunks = splitter.split_text(resume_text_filtered)
 for chunk in resume_chunks:
-    all_chunks.append({"source": "resume", "text": chunk})
+    if len(chunk.strip()) > 20:
+        all_chunks.append({"source": "resume", "text": chunk})
 
 for path, text in zip(readme_files, readme_texts):
     readme_chunks = splitter.split_text(text)
     for chunk in readme_chunks:
-        all_chunks.append({"source": path, "text": chunk})
+        if len(chunk.strip()) > 20:
+            all_chunks.append({"source": path, "text": chunk})
 
 # ---- Step 5: Save chunks to inspect ----
 

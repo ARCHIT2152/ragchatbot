@@ -441,14 +441,11 @@ python social_media_fixed.py
 | Model selection criterion | CV Accuracy | Less sensitive to test-set luck than a single split |
 
 --- Chunk 43 | source: mentalhealth_readme.md ---
----
-
---- Chunk 44 | source: mentalhealth_readme.md ---
 ## 📄 License
 
 MIT — free to use, modify, and distribute with attribution.
 
---- Chunk 45 | source: weapondetectiono_readme.md ---
+--- Chunk 44 | source: weapondetectiono_readme.md ---
 # 🛡️ AI-Powered Real-Time CCTV Weapon Detection System
 
 > **YOLOv8m · PyTorch · OpenCV · CUDA 12.1 · RTX 4050**  
@@ -456,10 +453,7 @@ MIT — free to use, modify, and distribute with attribution.
 
 ---
 
---- Chunk 46 | source: weapondetectiono_readme.md ---
-## Table of Contents
-
---- Chunk 47 | source: weapondetectiono_readme.md ---
+--- Chunk 45 | source: weapondetectiono_readme.md ---
 1. [Project Overview](#1-project-overview)
 2. [How It Works — Algorithm Stack](#2-how-it-works--algorithm-stack)
 3. [Technology Stack](#3-technology-stack)
@@ -473,43 +467,40 @@ MIT — free to use, modify, and distribute with attribution.
 11. [Confusion Matrix Analysis](#11-confusion-matrix-analysis)
 12. [Dataset Statistics](#12-dataset-statistics)
 
---- Chunk 48 | source: weapondetectiono_readme.md ---
+--- Chunk 46 | source: weapondetectiono_readme.md ---
 13. [Training History](#13-training-history)
 14. [Future Scope](#14-future-scope)
 
---- Chunk 49 | source: weapondetectiono_readme.md ---
----
-
---- Chunk 50 | source: weapondetectiono_readme.md ---
+--- Chunk 47 | source: weapondetectiono_readme.md ---
 ## 1. Project Overview
 
 Traditional CCTV surveillance is purely passive — it records footage and depends entirely on human operators watching screens. This introduces critical vulnerabilities: operator fatigue, delayed reaction times, and the physical impossibility of monitoring hundreds of cameras simultaneously.
 
 This project replaces passive monitoring with an **intelligent, automated, real-time Computer Vision system** that:
 
---- Chunk 51 | source: weapondetectiono_readme.md ---
+--- Chunk 48 | source: weapondetectiono_readme.md ---
 - Analyses live CCTV or webcam feeds at **30+ FPS** using GPU acceleration
 - Detects lethal weapons (**knives, pistols, guns**) in fractions of a second
 - Draws **red bounding boxes** with class labels and confidence scores on detected threats
 - Triggers **timestamped console alerts** the moment a weapon exceeds the confidence threshold
 - Automatically **saves evidence JPEG frames** to disk for security review
 
---- Chunk 52 | source: weapondetectiono_readme.md ---
+--- Chunk 49 | source: weapondetectiono_readme.md ---
 The system was trained iteratively across 7 model versions, culminating in a **YOLOv8m** (Medium, 25.9M parameters) model trained on an augmented Roboflow dataset, achieving a peak **mAP@50-95 of 0.6033** — meaning the AI draws surgically tight bounding boxes around weapon edges with verified accuracy.
 
 ---
 
---- Chunk 53 | source: weapondetectiono_readme.md ---
+--- Chunk 50 | source: weapondetectiono_readme.md ---
 ## 2. How It Works — Algorithm Stack
 
 ### 2.1 CNN — Convolutional Neural Network
 The foundational algorithm for all visual understanding. Instead of processing an entire image at once, a CNN slides small 3×3 mathematical filters (kernels) across every pixel. Early layers detect edges and gradients (the straight metallic edge of a knife blade). Deep layers detect complex shapes (the distinctive L-shape of a pistol grip). YOLOv8m contains 200+ such convolutional layers.
 
---- Chunk 54 | source: weapondetectiono_readme.md ---
+--- Chunk 51 | source: weapondetectiono_readme.md ---
 ### 2.2 CSPDarknet Backbone
 The feature-extraction engine inside YOLOv8. Normal networks recalculate the same information multiple times. CSP (Cross Stage Partial) architecture solves this by **splitting the data flow into two paths** at each stage: one path processes through dense math layers, the other bypasses them. Both paths merge at the end via a 1×1 convolution. This eliminates redundant computation, enabling 200+ layer depth at 30+ FPS on the RTX 4050.
 
---- Chunk 55 | source: weapondetectiono_readme.md ---
+--- Chunk 52 | source: weapondetectiono_readme.md ---
 ### 2.3 YOLO — You Only Look Once
 The primary object detection algorithm. Unlike two-stage detectors (R-CNN) that first propose regions then classify them, YOLO passes the image through the neural network **exactly once**. It divides the image into a 20×20 grid (= 8,400 cells), and each cell simultaneously predicts bounding box coordinates, objectness score, and class probabilities for all weapon types. This single-pass architecture is why real-time detection at 30+ FPS is achievable.
 
@@ -517,31 +508,31 @@ The primary object detection algorithm. Unlike two-stage detectors (R-CNN) that 
 Confidence Score = P(Object) × IoU(pred, truth) × P(Class | Object)
 ```
 
---- Chunk 56 | source: weapondetectiono_readme.md ---
+--- Chunk 53 | source: weapondetectiono_readme.md ---
 ### 2.4 Non-Maximum Suppression (NMS)
 After YOLO generates 8,400 candidate boxes per frame, many overlap on the same weapon. NMS eliminates duplicates by: sorting all boxes by confidence descending, keeping the highest-confidence box, then suppressing any remaining box with IoU > 0.5 overlap with it. This reduces 8,400 raw predictions to 1–3 clean final boxes, one per visible weapon.
 
---- Chunk 57 | source: weapondetectiono_readme.md ---
+--- Chunk 54 | source: weapondetectiono_readme.md ---
 ### 2.5 Transfer Learning
 Rather than training from random weights (which would take weeks), the model starts from `yolov8m.pt` — pretrained on the COCO dataset (80 classes, millions of images). The backbone already understands edges, textures, and shapes. Only the **detection head** is fine-tuned on the weapon dataset, enabling convergence in hours instead of weeks on the RTX 4050.
 
 ### 2.6 Distribution Focal Loss (DFL) + Varifocal Loss (VFL)
 The dual loss system that grades each training prediction:
 
---- Chunk 58 | source: weapondetectiono_readme.md ---
+--- Chunk 55 | source: weapondetectiono_readme.md ---
 - **VFL** handles classification (knife vs. pistol vs. background). It mathematically suppresses the ~95% empty background cells so weapon cells dominate the gradient signal — directly solving the class imbalance problem.
 - **DFL** handles localization. Instead of predicting a single edge coordinate, it models each box edge as a probability distribution over possible positions, forcing the model to snap box edges as tightly as possible to weapon boundaries. This is what drives the mAP@50-95 score higher.
 
---- Chunk 59 | source: weapondetectiono_readme.md ---
+--- Chunk 56 | source: weapondetectiono_readme.md ---
 ### 2.7 Backpropagation & AdamW Optimizer
 After each forward pass, the total loss is backpropagated through all 200+ layers using PyTorch's autograd engine. AdamW updates all 25.9 million weights using adaptive momentum — maintaining a running average of past gradients to smooth noisy updates. Over 150 epochs × ~500 batches, this performs approximately **1.2 million weight update steps** to produce `best.pt`.
 
 ---
 
---- Chunk 60 | source: weapondetectiono_readme.md ---
+--- Chunk 57 | source: weapondetectiono_readme.md ---
 ## 3. Technology Stack
 
---- Chunk 61 | source: weapondetectiono_readme.md ---
+--- Chunk 58 | source: weapondetectiono_readme.md ---
 | Library | Version | Role in Project |
 |---------|---------|-----------------|
 | **Python** | 3.11 | Core scripting language for all pipeline scripts |
@@ -552,16 +543,13 @@ After each forward pass, the total loss is backpropagated through all 200+ layer
 | **Pandas** | Latest | Parsing `results.csv` to programmatically find best model |
 | **CUDA** | 12.1 | NVIDIA parallel compute platform; 2560 cores on RTX 4050 |
 
---- Chunk 62 | source: weapondetectiono_readme.md ---
+--- Chunk 59 | source: weapondetectiono_readme.md ---
 | **GPU Hardware** | NVIDIA GeForce RTX 4050 | Trains 50 epochs in ~2.5 hrs vs. ~50 hrs on CPU |
 
---- Chunk 63 | source: weapondetectiono_readme.md ---
----
-
---- Chunk 64 | source: weapondetectiono_readme.md ---
+--- Chunk 60 | source: weapondetectiono_readme.md ---
 ## 4. Directory Structure
 
---- Chunk 65 | source: weapondetectiono_readme.md ---
+--- Chunk 61 | source: weapondetectiono_readme.md ---
 ```
 weapon_detection/
 │
@@ -577,7 +565,7 @@ weapon_detection/
 │   ├── images/
 │   │   ├── train/                  # Training images (.jpg)
 
---- Chunk 66 | source: weapondetectiono_readme.md ---
+--- Chunk 62 | source: weapondetectiono_readme.md ---
 │   │   └── val/                    # Validation images (.jpg)
 │   └── labels/
 │       ├── train/                  # YOLO TXT label files for train
@@ -594,7 +582,7 @@ weapon_detection/
 │           ├── BoxP_curve.png      # Precision-Confidence curve
 │           ├── BoxPR_curve.png     # Precision-Recall curve
 
---- Chunk 67 | source: weapondetectiono_readme.md ---
+--- Chunk 63 | source: weapondetectiono_readme.md ---
 │           ├── BoxR_curve.png      # Recall-Confidence curve
 │           ├── confusion_matrix_normalized.png
 │           └── labels.jpg          # Dataset label distribution
@@ -602,10 +590,7 @@ weapon_detection/
 └── detected_frames/                # Auto-created; saves weapon alert JPEGs
 ```
 
---- Chunk 68 | source: weapondetectiono_readme.md ---
----
-
---- Chunk 69 | source: weapondetectiono_readme.md ---
+--- Chunk 64 | source: weapondetectiono_readme.md ---
 ## 5. Installation & Setup
 
 ### Prerequisites
@@ -642,7 +627,7 @@ numpy
 
 ---
 
---- Chunk 70 | source: weapondetectiono_readme.md ---
+--- Chunk 65 | source: weapondetectiono_readme.md ---
 ## 6. Dataset Preparation
 
 ### Phase 1 — Kaggle Dataset (Pascal VOC format)
@@ -661,7 +646,7 @@ python voc_to_yolo.py
 
 **Result:** Created `labels/train/` and `labels/val/` directories with one `.txt` file per image.
 
---- Chunk 71 | source: weapondetectiono_readme.md ---
+--- Chunk 66 | source: weapondetectiono_readme.md ---
 ### Phase 2 — Roboflow Augmented Dataset (weapon detection.v1i.yolov8)
 The Phase 1 model suffered severe overfitting — it memorized clean Kaggle images and failed on real CCTV footage. The Roboflow dataset solved this with built-in augmentations:
 
@@ -673,7 +658,7 @@ The Phase 1 model suffered severe overfitting — it memorized clean Kaggle imag
 
 **Dataset class distribution (training split):**
 
---- Chunk 72 | source: weapondetectiono_readme.md ---
+--- Chunk 67 | source: weapondetectiono_readme.md ---
 | Class | Instances | Notes |
 |-------|-----------|-------|
 | knife | 2,157 | Primary weapon class — largest representation |
@@ -687,7 +672,7 @@ The Phase 1 model suffered severe overfitting — it memorized clean Kaggle imag
 
 ---
 
---- Chunk 73 | source: weapondetectiono_readme.md ---
+--- Chunk 68 | source: weapondetectiono_readme.md ---
 ## 7. Training the Model
 
 ```bash
@@ -699,7 +684,7 @@ python train.py
 ```python
 model = YOLO("yolov8m.pt")          # Medium model: 25.9M parameters
 
---- Chunk 74 | source: weapondetectiono_readme.md ---
+--- Chunk 69 | source: weapondetectiono_readme.md ---
 model.train(
     data="weapon detection.v1i.yolov8 (1)/data.yaml",
     epochs=150,                      # Maximum epochs allowed
@@ -716,7 +701,7 @@ model.train(
 
 ### Model Version History
 
---- Chunk 75 | source: weapondetectiono_readme.md ---
+--- Chunk 70 | source: weapondetectiono_readme.md ---
 | Model | Architecture | Dataset | Device | Epochs | Outcome |
 |-------|-------------|---------|--------|--------|---------|
 | 1–2 | yolov8n (nano) | Kaggle VOC | CPU | 50 | Overfit to clean images |
@@ -733,7 +718,7 @@ runs/detect/weapon_detection_model7/results.csv
 
 ---
 
---- Chunk 76 | source: weapondetectiono_readme.md ---
+--- Chunk 71 | source: weapondetectiono_readme.md ---
 ## 8. Running Real-Time Detection
 
 ```bash
@@ -754,13 +739,13 @@ python detect.py --source 0 --save_dir /path/to/alerts/
 
 **Interactive confidence slider:** An OpenCV trackbar is displayed in the window. Dragging it adjusts the minimum confidence threshold in real-time without restarting the script. Set between 0.50–0.65 for optimal precision/recall balance based on the F1 curve analysis.
 
---- Chunk 77 | source: weapondetectiono_readme.md ---
+--- Chunk 72 | source: weapondetectiono_readme.md ---
 **Automated alert system:** The moment a `knife`, `pistol`, or `gun` exceeds the confidence threshold:
 - A timestamped alert is printed to console: `[2025-01-15 14:23:11] ⚠️ ALERT: Weapon detected!`
 - A red bounding box with label (e.g., `PISTOL 0.87`) is drawn on the live frame
 - The annotated frame is saved as a JPEG to `detected_frames/` (throttled to every 30 frames to prevent disk flooding)
 
---- Chunk 78 | source: weapondetectiono_readme.md ---
+--- Chunk 73 | source: weapondetectiono_readme.md ---
 **Inference pipeline per frame:**
 ```
 cap.read() → NumPy (H,W,3) array
@@ -779,7 +764,7 @@ cap.read() → NumPy (H,W,3) array
 
 ---
 
---- Chunk 79 | source: weapondetectiono_readme.md ---
+--- Chunk 74 | source: weapondetectiono_readme.md ---
 ## 9. Model Performance & Metrics
 
 ### Peak Performance (Model 7 — `best.pt`)
@@ -796,7 +781,7 @@ cap.read() → NumPy (H,W,3) array
 
 Training ran for 84 epochs total before results.csv was recorded. The early stopping `patience=25` monitors for improvement beyond the 0.6033 peak achieved at Epoch 68. If no new high score is achieved by Epoch 93, PyTorch automatically terminates and definitively saves Epoch 68's weights as the final `best.pt`.
 
---- Chunk 80 | source: weapondetectiono_readme.md ---
+--- Chunk 75 | source: weapondetectiono_readme.md ---
 ```
 Peak score:    mAP50-95 = 0.6033 (Epoch 68)
 Epochs since:  16 epochs without improvement (as of Epoch 84)
@@ -806,7 +791,7 @@ Trigger epoch: Epoch 93 (if no improvement)
 
 ### Per-Class Performance (from Precision-Recall Curve)
 
---- Chunk 81 | source: weapondetectiono_readme.md ---
+--- Chunk 76 | source: weapondetectiono_readme.md ---
 | Class | AP@50 | Notes |
 |-------|-------|-------|
 | knife | 0.935 | Highest — largest training set (2,157 instances) |
@@ -819,19 +804,19 @@ Trigger epoch: Epoch 93 (if no improvement)
 
 ### What mAP@50-95 = 0.6033 Means
 
---- Chunk 82 | source: weapondetectiono_readme.md ---
+--- Chunk 77 | source: weapondetectiono_readme.md ---
 The mAP@50-95 metric averages precision across IoU thresholds from 0.50 to 0.95 in 0.05 steps. Unlike mAP@50 (which only requires 50% bounding box overlap), mAP@50-95 also rewards detections where the predicted box overlaps the ground truth by 90% or 95% — demanding surgically tight box edges. A score of **0.6033 on this strict scale confirms the model is not just finding weapons, but drawing precise, tight boxes around their exact edges.**
 
 ---
 
---- Chunk 83 | source: weapondetectiono_readme.md ---
+--- Chunk 78 | source: weapondetectiono_readme.md ---
 ## 10. Performance Curves Analysis
 
 ### F1-Confidence Curve
 
 The F1 score (harmonic mean of Precision and Recall) peaks at **F1 = 0.82 at confidence threshold = 0.583** across all classes. This is the mathematically optimal threshold for the confidence slider in `detect.py` — it maximises the balance between catching all weapons (recall) and avoiding false alarms (precision).
 
---- Chunk 84 | source: weapondetectiono_readme.md ---
+--- Chunk 79 | source: weapondetectiono_readme.md ---
 **Class-level observations:**
 - `knife` and `smartphone` achieve F1 > 0.90 across a wide confidence band (0.05–0.80)
 - `pistol` and `billete` maintain F1 ~0.85 through the mid-confidence range
@@ -842,33 +827,33 @@ The F1 score (harmonic mean of Precision and Recall) peaks at **F1 = 0.82 at con
 
 ### Precision-Confidence Curve
 
---- Chunk 85 | source: weapondetectiono_readme.md ---
+--- Chunk 80 | source: weapondetectiono_readme.md ---
 Precision rises monotonically and converges to **1.00 at confidence = 0.945** for all classes combined. This means: at very high confidence settings, every single detection the model makes is correct (zero false positives). The trade-off is sharply reduced recall at this threshold.
 
 **For security applications:** If false alarms have high operational cost (e.g., locking down an airport checkpoint), setting confidence to **0.75–0.85** achieves ~90%+ precision while maintaining reasonable recall.
 
 ### Precision-Recall Curve
 
---- Chunk 86 | source: weapondetectiono_readme.md ---
+--- Chunk 81 | source: weapondetectiono_readme.md ---
 The PR curve area (mAP@50 = 0.794) shows that the model can maintain near-perfect precision (~1.0) up to ~50% recall, after which precision begins to trade off. The `knife` class (AP=0.935) achieves 90%+ precision all the way to 90%+ recall — the best-performing class.
 
 **The `monedero` cliff** at recall ≈ 0.50 reveals that after finding half of all purse instances, the model cannot find the rest without producing many false positives — a direct consequence of its 63-instance training set.
 
 ### Recall-Confidence Curve
 
---- Chunk 87 | source: weapondetectiono_readme.md ---
+--- Chunk 82 | source: weapondetectiono_readme.md ---
 Recall starts at **0.81 across all classes at confidence = 0** and remains stable through confidence 0.70 before dropping sharply. This plateau confirms the model is confidently detecting most weapons — the flat region means the confidence slider can be moved from 0 to 0.70 without losing meaningful recall.
 
 At `detect.py`'s default threshold of **0.50**, expected recall is ~0.76 — meaning the system catches approximately 76 out of every 100 real weapon events in the scene.
 
 ---
 
---- Chunk 88 | source: weapondetectiono_readme.md ---
+--- Chunk 83 | source: weapondetectiono_readme.md ---
 ## 11. Confusion Matrix Analysis
 
 The normalized confusion matrix reveals the per-class accuracy of the model on the validation set:
 
---- Chunk 89 | source: weapondetectiono_readme.md ---
+--- Chunk 84 | source: weapondetectiono_readme.md ---
 | Class | Correct Detection | Background Confusion | Key Finding |
 |-------|-------------------|----------------------|-------------|
 | pistol | **0.93** | 0.07 → background | Best weapon class — extremely high accuracy |
@@ -878,14 +863,14 @@ The normalized confusion matrix reveals the per-class accuracy of the model on t
 | tarjeta | **0.60** | 0.40 → background | Moderate — 40% missed as background |
 | monedero | **0.50** | 0.50 → background | Weakest — half of all coin purses missed entirely |
 
---- Chunk 90 | source: weapondetectiono_readme.md ---
+--- Chunk 85 | source: weapondetectiono_readme.md ---
 **Critical security insight — pistol and knife have 0 cross-class confusion.** The model never mistakes a knife for a pistol or vice versa. All errors are of the "missed detection" type (weapon classified as background) rather than the "misclassification" type (weapon classified as wrong weapon). For a security system, this is the preferred failure mode — a missed detection is less operationally dangerous than incorrectly identifying a phone as a pistol.
 
 **The `monedero` problem (0.50 accuracy)** is entirely a data quantity issue — 63 training instances versus 2,157 for knife. Adding 200–400 more diverse `monedero` images would likely push its accuracy to 0.80+.
 
 ---
 
---- Chunk 91 | source: weapondetectiono_readme.md ---
+--- Chunk 86 | source: weapondetectiono_readme.md ---
 ## 12. Dataset Statistics (labels.jpg)
 
 **Training class distribution:**
@@ -893,7 +878,7 @@ The normalized confusion matrix reveals the per-class accuracy of the model on t
 - Dominant class: `knife` (2,157 instances = 67% of dataset)
 - Smallest class: `tarjeta` (57 instances = 1.8% of dataset)
 
---- Chunk 92 | source: weapondetectiono_readme.md ---
+--- Chunk 87 | source: weapondetectiono_readme.md ---
 **Bounding box geometry (from labels heatmap):**
 - Objects are **primarily centered** in images (x-y heatmap shows dense cluster around 0.4–0.6 normalized coordinates) — typical for controlled-capture security datasets
 - Bounding box **width-height cluster** tightly at 0.10–0.20 normalized size — meaning objects typically occupy 10–20% of the image width/height, matching real CCTV distances
@@ -901,7 +886,7 @@ The normalized confusion matrix reveals the per-class accuracy of the model on t
 
 ---
 
---- Chunk 93 | source: weapondetectiono_readme.md ---
+--- Chunk 88 | source: weapondetectiono_readme.md ---
 ## 13. Training History
 
 Below are the key metrics from `results.csv` showing model progression:
@@ -915,7 +900,7 @@ Below are the key metrics from `results.csv` showing model progression:
 | **68** | **0.794** | **0.603** | **0.917** | **0.753** | **~0.75** | **~0.95** |
 | 84 | 0.718 | 0.542 | 0.937 | 0.659 | 0.698 | 1.078 |
 
---- Chunk 94 | source: weapondetectiono_readme.md ---
+--- Chunk 89 | source: weapondetectiono_readme.md ---
 **Training interpretation:**
 - Epoch 1–25: Rapid initial learning as the detection head adapts from COCO to weapon classes
 - Epoch 25–68: Steady improvement; augmented data prevents the overfitting seen in Phase 1
@@ -924,7 +909,7 @@ Below are the key metrics from `results.csv` showing model progression:
 
 ---
 
---- Chunk 95 | source: weapondetectiono_readme.md ---
+--- Chunk 90 | source: weapondetectiono_readme.md ---
 ## 14. Future Scope
 
 ### Immediate Improvements
@@ -932,21 +917,17 @@ Below are the key metrics from `results.csv` showing model progression:
 - **YOLOv8l (Large)** — 43.7M parameters vs 25.9M; direct accuracy boost if VRAM allows
 - **100 epoch retraining** with targeted augmentation for underperforming classes
 
---- Chunk 96 | source: weapondetectiono_readme.md ---
+--- Chunk 91 | source: weapondetectiono_readme.md ---
 ### System Expansions
 - **Facial Recognition Integration** — correlate saved `detected_frames/` JPEGs with a face database (DeepFace / AWS Rekognition) to instantly identify suspects at point of detection
 - **Pose Estimation (YOLOv8-pose)** — analyse human skeleton keypoints alongside weapon detection to identify threatening stances (aiming posture) before the weapon is clearly visible
 - **Cloud & Edge Deployment** — migrate the PyTorch inference engine to AWS EC2 GPU instances for city-wide CCTV monitoring, or to NVIDIA Jetson edge devices for local processing at each camera node
 
---- Chunk 97 | source: weapondetectiono_readme.md ---
+--- Chunk 92 | source: weapondetectiono_readme.md ---
 - **RTSP stream support** — connect directly to IP camera streams: `python detect.py --source rtsp://camera-ip/stream`
 - **Temporal smoothing** — require weapon detection in 3 of 5 consecutive frames before triggering an alert, eliminating single-frame false positives
 
---- Chunk 98 | source: weapondetectiono_readme.md ---
----
----
-
---- Chunk 99 | source: weapondetectiono_readme.md ---
+--- Chunk 93 | source: weapondetectiono_readme.md ---
 ## Acknowledgements
 
 - **Ultralytics** for the YOLOv8 framework

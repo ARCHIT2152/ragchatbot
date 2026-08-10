@@ -169,10 +169,6 @@
   },
   {
     "source": "mentalhealth_readme.md",
-    "text": "---"
-  },
-  {
-    "source": "mentalhealth_readme.md",
     "text": "## \ud83d\udcc4 License\n\nMIT \u2014 free to use, modify, and distribute with attribution."
   },
   {
@@ -181,19 +177,11 @@
   },
   {
     "source": "weapondetectiono_readme.md",
-    "text": "## Table of Contents"
-  },
-  {
-    "source": "weapondetectiono_readme.md",
     "text": "1. [Project Overview](#1-project-overview)\n2. [How It Works \u2014 Algorithm Stack](#2-how-it-works--algorithm-stack)\n3. [Technology Stack](#3-technology-stack)\n4. [Directory Structure](#4-directory-structure)\n5. [Installation & Setup](#5-installation--setup)\n6. [Dataset Preparation](#6-dataset-preparation)\n7. [Training the Model](#7-training-the-model)\n8. [Running Real-Time Detection](#8-running-real-time-detection)\n9. [Model Performance & Metrics](#9-model-performance--metrics)\n10. [Performance Curves Analysis](#10-performance-curves-analysis)\n11. [Confusion Matrix Analysis](#11-confusion-matrix-analysis)\n12. [Dataset Statistics](#12-dataset-statistics)"
   },
   {
     "source": "weapondetectiono_readme.md",
     "text": "13. [Training History](#13-training-history)\n14. [Future Scope](#14-future-scope)"
-  },
-  {
-    "source": "weapondetectiono_readme.md",
-    "text": "---"
   },
   {
     "source": "weapondetectiono_readme.md",
@@ -249,10 +237,6 @@
   },
   {
     "source": "weapondetectiono_readme.md",
-    "text": "---"
-  },
-  {
-    "source": "weapondetectiono_readme.md",
     "text": "## 4. Directory Structure"
   },
   {
@@ -266,10 +250,6 @@
   {
     "source": "weapondetectiono_readme.md",
     "text": "\u2502           \u251c\u2500\u2500 BoxR_curve.png      # Recall-Confidence curve\n\u2502           \u251c\u2500\u2500 confusion_matrix_normalized.png\n\u2502           \u2514\u2500\u2500 labels.jpg          # Dataset label distribution\n\u2502\n\u2514\u2500\u2500 detected_frames/                # Auto-created; saves weapon alert JPEGs\n```"
-  },
-  {
-    "source": "weapondetectiono_readme.md",
-    "text": "---"
   },
   {
     "source": "weapondetectiono_readme.md",
@@ -386,10 +366,6 @@
   {
     "source": "weapondetectiono_readme.md",
     "text": "- **RTSP stream support** \u2014 connect directly to IP camera streams: `python detect.py --source rtsp://camera-ip/stream`\n- **Temporal smoothing** \u2014 require weapon detection in 3 of 5 consecutive frames before triggering an alert, eliminating single-frame false positives"
-  },
-  {
-    "source": "weapondetectiono_readme.md",
-    "text": "---\n---"
   },
   {
     "source": "weapondetectiono_readme.md",

@@ -1,8 +1,6 @@
 import json
 import numpy as np
 
-# ---- Load embedded chunks ----
-
 with open("embedded_chunks.json", "r", encoding="utf-8") as f:
     chunks = json.load(f)
 
@@ -14,19 +12,17 @@ def cosine_similarity(vec_a, vec_b):
     magnitude_b = np.linalg.norm(b)
     return dot_product / (magnitude_a * magnitude_b)
 
-# ---- Pick chunks to compare ----
-# Get all weapon detection chunks first, then filter for substantive/technical ones
+
 weapon_chunks = [c for c in chunks if c["source"] == "weapondetectiono_readme.md"]
 mentalhealth_chunks = [c for c in chunks if c["source"] == "mentalhealth_readme.md"]
 
-# Related: two DIFFERENT technical chunks from weapon detection (not title/ToC)
+
 weapon_technical_1 = [c for c in weapon_chunks if "knife" in c["text"] or "pistol" in c["text"]]
 weapon_technical_2 = [c for c in weapon_chunks if "surveillance" in c["text"] or "alert" in c["text"] or "confidence threshold" in c["text"]]
 
-# Unrelated: substantive weapon detection chunk vs substantive mental health chunk
+
 mentalhealth_technical = [c for c in mentalhealth_chunks if "XGBoost" in c["text"] or "accuracy" in c["text"]]
 
-# ---- Run comparisons ----
 
 print("=== Related pair (both weapon detection, technical content) ===")
 sim_related = cosine_similarity(weapon_technical_1[0]["embedding"], weapon_technical_2[0]["embedding"])
