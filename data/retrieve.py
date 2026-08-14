@@ -19,7 +19,7 @@ def cosine_similarity(vec_a, vec_b):
     magnitude_b = np.linalg.norm(b)
     return dot_product / (magnitude_a * magnitude_b)
 
-with open("embedded_chunks.json", "r", encoding="utf-8") as f:
+with open("C:/Users/archit/Desktop/ragbot/data/embedded_chunks.json", "r", encoding="utf-8") as f:
     chunks = json.load(f)
 
 EMBEDDING_MODEL = "gemini-embedding-001"
