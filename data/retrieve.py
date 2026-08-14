@@ -4,6 +4,8 @@ from google.genai import types
 import os
 import json
 import numpy as np
+from langchain_core.tools import tool
+
 
 load_dotenv()
 api_key = os.getenv("GEMINI_API_KEY")
@@ -22,7 +24,12 @@ with open("embedded_chunks.json", "r", encoding="utf-8") as f:
 
 EMBEDDING_MODEL = "gemini-embedding-001"
 
-def search_portfolio(query, top_k=3):
+@tool
+def search_portfolio(query: str, top_k: int =3):
+    """Use this tool to answer questions about Archit's projects, technical
+    skills, education, or certifications. It searches his resume and project
+    documentation and returns the most relevant information."""
+
     result = client.models.embed_content(
         model=EMBEDDING_MODEL,
         contents=query,
@@ -36,11 +43,13 @@ def search_portfolio(query, top_k=3):
         scores.append((score, chunk))
 
     ranked = sorted(scores, key=lambda x: x[0], reverse=True)
+    top_chunks = ranked[:top_k]
 
-    return ranked[:top_k]
+    result_text = "\n\n".join(chunk["text"] for score, chunk in top_chunks)
+    return result_text
 
 
-# ---- Test with a specific, sharp question ----
+"""# ---- Test with a specific, sharp question ----
 print("=== Query: 'What was your YOLOv8 model's precision?' ===")
 results = search_portfolio("What was your YOLOv8 model's precision?")
 for score, chunk in results:
@@ -54,4 +63,7 @@ results = search_portfolio("What model did you use for weapon detection, and wha
 for score, chunk in results:
     print(f"Score: {score:.4f} | Source: {chunk['source']}")
     print(f"Text: {chunk['text'][:200]}...")
-    print("-" * 40)
+    print("-" * 40)"""
+
+if __name__ == "__main__":
+    print(search_portfolio.invoke({"query": "What was your YOLOv8 model's precision?"}))
